@@ -18,7 +18,7 @@ class languages:
 
     def processes_py(self, p):
         code_path = self.code_path+".py"
-
+        pid = os.getpid()
         fp = open("problems/"+self.problem_id+"/in"+str(p)+".txt", "r")
         contents = fp.read()
         fp.close()
@@ -27,30 +27,35 @@ class languages:
             raise Exception("Timed out!")
 
         timeout = False
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(self.time_out)   # timeout seconds
-
-        try:
-            start_time = time.time()
-            op = Popen(["python", code_path], stdin=PIPE,
-                       stdout=PIPE, stderr=PIPE)
-            stdout, stderr = op.communicate(contents.encode("utf-8"))
-            t = (time.time() - start_time)
-            stdout = stdout.decode()
-            stderr = stderr.decode()
-
-        except Exception as i:
-            timeout = True
-            return(timeout)
+        #signal.signal(signal.SIGALRM, signal_handler)
+        # signal.alarm(self.time_out)   # timeout seconds
+        stdout = ''
+        stderr = 'e'
+        #t = 2
+        # try:
+        start_time = time.time()
+        op = Popen(["timeout", "2s", "python", code_path], stdin=PIPE,
+                   stdout=PIPE, stderr=PIPE)
+        stdout, stderr = op.communicate(contents.encode("utf-8"))
+        t = (time.time() - start_time)
+        stdout = stdout.decode()
+        stderr = stderr.decode()
+        # try:
+        #    os.kill(op.pid, signal.SIGKILL)
+        # except:
+        #    pass
+        # except Exception as i:
+        #    timeout = True
+        #    return(stdout, stderr, t, pid)
 
         # write code to compare output with test_case_op file and update value of status
-        fp = open("problems/"+self.problem_id+"/op"+str(p)+".txt", "r")
-        contents = fp.read()
-        fp.close()
+        # fp = open("problems/"+self.problem_id+"/op"+str(p)+".txt", "r")
+        # contents = fp.read()
+        # fp.close()
 
-        status = (stdout == contents)
+        # status = (stdout == contents)
 
-        return(stdout, stderr, status, t)
+        return(stdout, stderr, t, pid)
 
     def get_number_of_testcases(self):
         fp = open("problems/"+self.problem_id+"/number_cases.txt", "r")
@@ -61,16 +66,28 @@ class languages:
         code_path = self.code_path+".py"
 
         # to check for compilation error; dont proceed into threading if compilation error
-        op = Popen(["python", code_path], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        stdout, stderr = op.communicate()
-        stdout = stdout.decode()
-        stderr = stderr.decode()
-
-        if(stderr != ''):
+        #op = Popen(["python", code_path], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        #stdout, stderr = op.communicate()
+        #stdout = stdout.decode()
+        #stderr = stderr.decode()
+        stderr = ''
+        try:
+            os.kill(op.pid, signal.SIGKILL)
+        except:
+            pass
+        if(stderr == ''):
             testcases = self.get_number_of_testcases()
-            p = Pool(processes=testcases)
+            #p = Pool(processes=testcases)
+            p = ThreadPool()
             results = p.map(self.processes_py, list(range(testcases)))
             p.close()
+            # for stdout, stderr, t, pid in results:
+            #     try:
+            #         os.kill(op.pid, signal.SIGKILL)
+            #     except:
+            #         pass
+            # p.terminate()
+            # p.join()
 
             return results, 1
 
@@ -84,25 +101,25 @@ class languages:
         contents = fp.read()
         fp.close()
 
-        def signal_handler(signum, frame):
-            raise Exception("Timed out!")
+        # def signal_handler(signum, frame):
+        #     raise Exception("Timed out!")
 
-        timeout = False
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(self.time_out)   # timeout seconds
+        # timeout = False
+        # signal.signal(signal.SIGALRM, signal_handler)
+        # signal.alarm(self.time_out)   # timeout seconds
 
-        try:
-            start_time = time.time()
-            op = Popen([self.student_path+"/./a.out"],
-                       stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            stdout, stderr = op.communicate(contents.encode("utf-8"))
-            t = (time.time() - start_time)
-            stdout = stdout.decode()
-            stderr = stderr.decode()
+        # try:
+        start_time = time.time()
+        op = Popen(["timeout","2s",self.student_path+"/./a.out"],
+                    stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = op.communicate(contents.encode("utf-8"))
+        t = (time.time() - start_time)
+        stdout = stdout.decode()
+        stderr = stderr.decode()
 
-        except Exception as i:
-            timeout = True
-            return(timeout)
+        # except Exception as i:
+        #     timeout = True
+        #     return(timeout)
 
         # write code to compare output with test_case_op file and update value of status
         fp = open("problems/"+self.problem_id+"/op"+str(p)+".txt", "r")
@@ -127,10 +144,10 @@ class languages:
         stdout = stdout.decode()
         stderr = stderr.decode()
 
-        if(stderr != ''):
+        if(stderr == ''):
             testcases = self.get_number_of_testcases()
 
-            p = Pool(processes=testcases)
+            p = ThreadPool()
             results = p.map(self.processes_C, list(range(testcases)))
             p.close()
 
@@ -146,25 +163,25 @@ class languages:
         contents = fp.read()
         fp.close()
 
-        def signal_handler(signum, frame):
-            raise Exception("Timed out!")
+        # def signal_handler(signum, frame):
+        #     raise Exception("Timed out!")
 
-        timeout = False
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(self.time_out)   # timeout seconds
+        # timeout = False
+        # signal.signal(signal.SIGALRM, signal_handler)
+        # signal.alarm(self.time_out)   # timeout seconds
 
-        try:
-            start_time = time.time()
-            op = Popen([self.student_path+"/./a.out"],
-                       stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            stdout, stderr = op.communicate(contents.encode("utf-8"))
-            t = (time.time() - start_time)
-            stdout = stdout.decode()
-            stderr = stderr.decode()
+        # try:
+        start_time = time.time()
+        op = Popen(["timeout","2s",self.student_path+"/./a.out"],
+                    stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = op.communicate(contents.encode("utf-8"))
+        t = (time.time() - start_time)
+        stdout = stdout.decode()
+        stderr = stderr.decode()
 
-        except Exception as i:
-            timeout = True
-            return(timeout)
+        # except Exception as i:
+        #     timeout = True
+        #     return(timeout)
 
         # write code to compare output with test_case_op file and update value of status
         fp = open("problems/"+self.problem_id+"/op"+str(p)+".txt", "r")
@@ -184,10 +201,10 @@ class languages:
         stdout = stdout.decode()
         stderr = stderr.decode()
 
-        if(stderr != ''):
+        if(stderr == ''):
             testcases = self.get_number_of_testcases()
 
-            p = Pool(processes=testcases)
+            p = ThreadPool()
             results = p.map(self.processes_cpp, list(range(testcases)))
             p.close()
 
@@ -210,18 +227,18 @@ class languages:
         signal.signal(signal.SIGALRM, signal_handler)
         signal.alarm(self.time_out)   # timeout seconds
 
-        try:
-            start_time = time.time()
-            op = Popen(["java", self.student_path+"/temp"],
-                       stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            stdout, stderr = op.communicate(contents.encode("utf-8"))
-            t = (time.time() - start_time)
-            stdout = stdout.decode()
-            stderr = stderr.decode()
+        # try:
+        start_time = time.time()
+        op = Popen(["timeout","2s","java", self.student_path+"/temp"],
+                    stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = op.communicate(contents.encode("utf-8"))
+        t = (time.time() - start_time)
+        stdout = stdout.decode()
+        stderr = stderr.decode()
 
-        except Exception as i:
-            timeout = True
-            return(timeout)
+        # except Exception as i:
+        #     timeout = True
+        #     return(timeout)
 
         # write code to compare output with test_case_op file and update value of status
         fp = open("problems/"+self.problem_id+"/op"+str(p)+".txt", "r")
@@ -244,7 +261,7 @@ class languages:
         if(stderr != ''):
             testcases = get_number_of_testcases()
 
-            p = Pool(processes=testcases)
+            p = ThreadPool()
             results = p.map(self.processes_java, list(range(testcases)))
             p.close()
 
