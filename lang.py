@@ -18,7 +18,7 @@ def get_class_name(program_path):
         if 'class' in lines:
             words = lines.split(' ')
             for i in range(len(words)):
-                if words[i]=='class':
+                if words[i] == 'class':
                     return words[i+1]
             break
 
