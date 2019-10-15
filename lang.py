@@ -5,6 +5,22 @@ from multiprocessing import Pool
 import os
 import signal
 
+#   Getting JAVA class name
+def get_class_name(program_path):
+    fptr = open(program_path+'.txt',"r")
+    contents = tuple(fptr)
+    fptr.close()
+
+    contents =[x.strip()  for x in contents]
+
+    for lines in contents:
+    words = []
+    if 'class' in lines:
+        words = lines.split(' ')
+        for i in range(len(words)):
+            if words[i]=='class':
+                return words[i+1]
+        break
 
 class languages:
 
@@ -250,7 +266,8 @@ class languages:
         return(stdout, stderr, status, t)
 
     def java_lang(self):
-        code_path = self.code_path+".java"
+        new_code_path = get_class_name(self.code_path)
+        code_path = new_code_path+".java"
 
         op = Popen(["javac", code_path],
                    stdin=PIPE, stdout=PIPE, stderr=PIPE)
