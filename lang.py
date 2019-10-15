@@ -14,13 +14,13 @@ def get_class_name(program_path):
     contents =[x.strip()  for x in contents]
 
     for lines in contents:
-    words = []
-    if 'class' in lines:
-        words = lines.split(' ')
-        for i in range(len(words)):
-            if words[i]=='class':
-                return words[i+1]
-        break
+        words = []
+        if 'class' in lines:
+            words = lines.split(' ')
+            for i in range(len(words)):
+                if words[i]=='class':
+                    return words[i+1]
+            break
 
 class languages:
 
