@@ -42,6 +42,15 @@ def threading(p):
     return(stdout, stderr, t, timeout)
     # write code to compare output with test_case_op file and update value of status
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers',
+                         'Content-Type, Authorization')
+    response.headers.add('Access-Control-Allow-Methods',
+                         'GET, PUT, POST,DELETE,OPTIONS')
+    response.headers.add('Origin', '127.0.0.1')
+    return response
 
 @app.route('/v1/run_code', methods=['POST'])
 def compile():
